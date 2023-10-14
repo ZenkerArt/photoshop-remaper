@@ -1,13 +1,20 @@
+import ctypes
 import threading
 
+import keyboard
+import win32api
 from PIL import Image, ImageDraw
 from loguru import logger
 from pystray import Icon as icon, Menu as menu, MenuItem as item
 import dearpygui.dearpygui as dpg
 
 logger.add("logs.txt", rotation="1 MB")
+user32 = ctypes.WinDLL('user32', use_last_error=True)
+user32.LoadKeyboardLayoutA('00000402', 1)
+keyboard._winkeyboard._setup_name_tables()
 
 from start_app import start_app, stop_app
+
 
 def create_image(width, height, color1, color2):
     # Generate an image and draw a pattern
@@ -41,6 +48,7 @@ ico = icon('PhotoshopRemaper', create_image(64, 64, 'black', 'white'),
                    'Закрыть',
                    stop)
            ))
+
 ico.run_detached()
 
 start_app()

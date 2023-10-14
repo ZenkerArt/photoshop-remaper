@@ -4,6 +4,8 @@ from dataclasses import asdict
 from json import dumps, loads
 
 import dearpygui.dearpygui as dpg
+import keyboard
+import win32api
 
 from hotkey_remap_window import HotKeyRemapWindow
 from hotkey_watcher import HotKeyWatcher
@@ -17,6 +19,7 @@ FILE_KEYS_PATH = os.path.join(application_path, './keys.json')
 FONT_PATH = os.path.join(application_path, './assets/fonts/arial.ttf')
 photoshop = Remaper('Photoshop')
 
+# print(keyboard._os_keyboard.to_name)
 if os.path.exists(FILE_KEYS_PATH):
     with open(FILE_KEYS_PATH, mode='r') as fs:
         data = loads(fs.read())['data']
@@ -24,6 +27,8 @@ if os.path.exists(FILE_KEYS_PATH):
             photoshop.remap(i['src'], i['dst'])
 
 is_open = False
+
+
 class HotkeyList:
     _listbox: int = 0
     _remaper: Remaper

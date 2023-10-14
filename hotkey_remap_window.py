@@ -2,7 +2,7 @@ from typing import Callable
 
 import dearpygui.dearpygui as dpg
 
-from hotkey_watcher import HotKeyWatcher
+from hotkey_watcher import HotKeyWatcher, Hotkey
 
 
 class HotKeyRemapWindow:
@@ -55,8 +55,8 @@ class HotKeyRemapWindow:
                 dpg.add_button(label="Отмена", callback=self._cancel)
 
     def hide(self):
-        self.set_key_dst('')
-        self.set_key_src('')
+        self.set_key_dst()
+        self.set_key_src()
         dpg.hide_item(self._wnd)
 
     def show(self):
@@ -72,10 +72,30 @@ class HotKeyRemapWindow:
         self.apply_callback(self._key_src, self._key_dst)
         self.hide()
 
-    def set_key_src(self, text: str):
-        dpg.configure_item(self._text1, default_value=text or "Не задано")
-        self._key_src = text
+    def set_key_src(self, text: Hotkey | str = None):
+        if isinstance(text, str):
+            dpg.configure_item(self._text1, default_value=text)
+            self._key_src = text
+            return
 
-    def set_key_dst(self, text: str):
-        dpg.configure_item(self._text2, default_value=text or "Не задано")
-        self._key_dst = text
+        if text is None:
+            dpg.configure_item(self._text1, default_value="Не задано")
+            self._key_src = ''
+            return
+
+        dpg.configure_item(self._text1, default_value=text.name)
+        self._key_src = text.name
+
+    def set_key_dst(self, text: Hotkey | str = None):
+        if isinstance(text, str):
+            dpg.configure_item(self._text2, default_value=text)
+            self._key_dst = text
+            return
+
+        if text is None:
+            dpg.configure_item(self._text2, default_value="Не задано")
+            self._key_dst = ''
+            return
+
+        dpg.configure_item(self._text2, default_value=text.name or "Не задано")
+        self._key_dst = text.name

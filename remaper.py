@@ -4,14 +4,8 @@ import keyboard
 import win32gui
 from loguru import logger
 
-
-@dataclass()
-class HotkeyRemap:
-    src: str
-    dst: str
-    scan_src: list[int]
-    scan_dst: list[int]
-    index: int
+from hotkey_remap import HotkeyRemap
+from hotkey_watcher import Hotkey
 
 
 class Remaper:
@@ -59,6 +53,24 @@ class Remaper:
     def get_by_index(self, index: int) -> HotkeyRemap:
         return self._keys[index]
 
+    def remap_result(self, key_src: Hotkey, key_dst: Hotkey) -> bool:
+        if self.get_has_src(key_src.name): return True
+        try:
+            keyboard.add_hotkey(key_src.scan, self._hotkey_handler, (key_src, key_dst), suppress=True,
+                                trigger_on_release=False)
+            logger.info(f'Add remap hotkey "{self._program_class}": {key_src} -> {key_dst}')
+            self._keys.append(HotkeyRemap(
+                src=key_src.name,
+                dst=key_dst.name,
+                scan_src=key_src.scan,
+                scan_dst=key_dst.scan,
+                index=len(self._keys)
+            ))
+            return True
+        except ValueError:
+            logger.warning(f'Invalid hotkey "{self._program_class}": {key_src} -> {key_dst}')
+            return False
+
     def remap(self, key_src: str, key_dst: str) -> bool:
         if self.get_has_src(key_src): return True
         try:
@@ -88,8 +100,18 @@ class Remaper:
             pass
 
     def change(self, index: int, src: str, dst: str):
-        self._keys[index].src = src
-        self._keys[index].dst = dst
+        hotkey = self.get_by_index(index)
+
+        try:
+            keyboard.remove_hotkey(src)
+        except KeyError:
+            pass
+        keyboard.add_hotkey(src, self._hotkey_handler, (src, dst), suppress=True, trigger_on_release=False)
+
+        logger.info(f'Change remap hotkey "{self._program_class}": from "{hotkey.src} -> {hotkey.dst}" to "{src} -> {dst}"')
+
+        hotkey.src = src
+        hotkey.dst = dst
 
     def get_keys(self) -> list[HotkeyRemap]:
         return self._keys
