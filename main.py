@@ -1,11 +1,13 @@
 import threading
 
 from PIL import Image, ImageDraw
+from loguru import logger
 from pystray import Icon as icon, Menu as menu, MenuItem as item
 import dearpygui.dearpygui as dpg
 
-from start_app import start_app, stop_app
+logger.add("logs.txt", rotation="1 MB")
 
+from start_app import start_app, stop_app
 
 def create_image(width, height, color1, color2):
     # Generate an image and draw a pattern

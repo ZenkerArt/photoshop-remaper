@@ -127,4 +127,5 @@ def start_app():
 
 
 def stop_app():
-    dpg.stop_dearpygui()
+    if is_open:
+        dpg.stop_dearpygui()

@@ -14,12 +14,6 @@ class HotKeyWatcher:
         self.callback = lambda x: None
         self.d = keyboard.hook(self._on_press)
 
-    def on_key_down(self):
-        pass
-
-    def _on_pressR(self, event: keyboard.KeyboardEvent):
-        print(event.event_type)
-
     def _on_press(self, event: keyboard.KeyboardEvent):
         key = scan_code_to_name(event.scan_code)
         if key is None: return

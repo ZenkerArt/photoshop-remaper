@@ -9,6 +9,8 @@ from loguru import logger
 class HotkeyRemap:
     src: str
     dst: str
+    scan_src: list[int]
+    scan_dst: list[int]
     index: int
 
 
@@ -57,15 +59,21 @@ class Remaper:
     def get_by_index(self, index: int) -> HotkeyRemap:
         return self._keys[index]
 
-    def remap(self, key_src: str, key_dst: str):
-        if self.get_has_src(key_src): return
-        self._keys.append(HotkeyRemap(
-            src=key_src,
-            dst=key_dst,
-            index=len(self._keys)
-        ))
-        logger.info(f'Add remap hotkey "{self._program_class}": {key_src} -> {key_dst}')
-        keyboard.add_hotkey(key_src, self._hotkey_handler, (key_src, key_dst), suppress=True, trigger_on_release=False)
+    def remap(self, key_src: str, key_dst: str) -> bool:
+        if self.get_has_src(key_src): return True
+        try:
+            keyboard.add_hotkey(key_src, self._hotkey_handler, (key_src, key_dst), suppress=True,
+                                trigger_on_release=False)
+            logger.info(f'Add remap hotkey "{self._program_class}": {key_src} -> {key_dst}')
+            self._keys.append(HotkeyRemap(
+                src=key_src,
+                dst=key_dst,
+                index=len(self._keys)
+            ))
+            return True
+        except ValueError:
+            logger.warning(f'Invalid hotkey "{self._program_class}": {key_src} -> {key_dst}')
+            return False
 
     def unremap(self, key_src: str):
         try:
